@@ -12,6 +12,8 @@ The aim of this project is given by Udacity as follows:
 
 > In this environment, a double-jointed arm can move to target locations. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. Thus, the goal of your agent is to maintain its position at the target location for as many time steps as possible.
 
+This environment is considered solved if the agent can maintain a reward of 30 over 100 consecutive episodes. 
+
 The state & action spaces are as follows: 
 
 > The observation space consists of 33 variables corresponding to position, rotation, velocity, and angular velocities of the arm. Each action is a vector with four numbers, corresponding to torque applicable to two joints. Every entry in the action vector should be a number between -1 and 1.
@@ -46,7 +48,7 @@ As with project 1, I have provided here the instructions (provided by Udacity) o
 
 # Instructions 
 
-In order to run the code in this repository, please first follow the above instructions, then load my notebook [NAME TO BE EDITED] into your .ipynb reader of choice, such as Jupyter. Please ensure that you also have [REQUIRED CODE] .py files loaded in the local area. 
+In order to run the code in this repository, please first follow the above instructions, then load my notebook `Continuous_Control.ipynb` into your .ipynb reader of choice, such as Jupyter. Please ensure that you also have `model.py` and `ddpg_agent.py` files loaded in the local area. 
 
 # Information
 

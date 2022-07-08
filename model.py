@@ -76,7 +76,7 @@ class Critic(nn.Module):
         if state.dim() == 1:
             state = torch.unsqueeze(state,0)
         xs = F.relu(self.fcs1(state))
-        xs = self.bn1(xs) #batch normalisation
-        x = torch.cat((xs, action), dim=1)
+        x = self.bn1(xs) #batch normalisation
+        x = torch.cat((x, action), dim=1)
         x = F.relu(self.fc2(x))
         return self.fc3(x)

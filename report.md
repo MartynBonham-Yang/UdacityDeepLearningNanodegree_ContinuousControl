@@ -14,7 +14,7 @@ However, this code is not actually the correct code for the project we are worki
 
 It should be obvious that this is totally useless as a model. Therefore, changes need to be made. 
 
-# Making some initial changes 
+# Making changes 
 
 In Udacity's advice for those unsure where to start, they recommend re-reading the DDPG paper. This paper recommends using a replay buffer, as well as an Adam optimizer (we already have this) and hyperparameter values as follows: 
 
@@ -25,11 +25,10 @@ In Udacity's advice for those unsure where to start, they recommend re-reading t
 
 All of these parameters are identical to the ones we already have, and we also have the replay buffer, too. 
 
-After some thinking hyperparameter modification should be focused in 2 areas: 
+After some thinking, we decide that hyperparameter modification should be focused in 2 areas: 
 
 1. Experience variety
 2. Learning speed 
-
 
 ------
 
@@ -51,8 +50,80 @@ After adding this learning speed change, we set the agent to learn for 1000 epis
 
 `Episode 1000  Average Score: 3.36`
 
-Obviously there is still something we are missing. As the agent seems to get better over time, but very very slowly, another thing which we can modify is the learning rate - for the actor, the default is $1e^-04$ and for the critic the rate is $1e^-03$. We can reduce one or both of these to accelerate learning. We chose to modify the learning rate for the actor (the 'more important' network) down to $1e^-03$ in-line with the critic. 
+Obviously there is still something we are missing. As the agent seems to get better over time, but very very slowly, another thing which we can modify is the learning rate - for the actor, the default is $1e^-04$ and for the critic the rate is $1e^-03$. We can increase one or both of these to accelerate learning. We chose to modify the learning rate for the actor (the 'more important' network) to $1e^-03$ in-line with the critic. 
+
+This led to some major improvement, giving us the following result: 
+
+`Episode 1000  Average Score: 22.74`
+
+------
+
+# Further changes 
+
+## Batch normalisation & gradient clipping
+
+While 22.74 is better than 3.36, it is still not "solved". Simply modifying hyperparameters does not seem to have solved our issues. Perhaps a longer run would solve the environment, but this also poses a risk of our scores going down in the later episodes. To prevent this, the DDPG paper mentions *gradient clipping*, which can be added to the `ddpg_agent.py`. This should help prevent a longer training time from resulting in declining average scores. When adding this plus a longer training time to our neural network however, the environment disconnects before 2000 episodes are able to complete. This strongly suggests that we should try something else. Lowering the value of `k` may help, as may *batch normalisation*, a process which the DDPG paper recommends adding after some of the layers in the neural network. We changed to `k=15` and added batch normalisation after our first layers of both the Actor and Critic neural networks, which should improve performance. 
+
+This finally makes our model perform well enough to solve the environment, after **896** episodes with an average score of 30.06.
+
+### Plot of successful model training
+
+![Plot_of_results](https://user-images.githubusercontent.com/57990075/178012792-d65504fd-5b2e-470e-be1f-b64214c9c761.png)
 
 
+-------
 
-#3. Stability of training 
+# Model description
+
+Here we briefly describe the learning algorithm, the hyperparameters, and the model architecture for the Actor and Critic. 
+
+## Learning algorithm 
+
+We used the DDPG (Deep Deterministic Policy Gradient) algorithm. This is an algorithm which learns a policy and a Q-function at the same time, and uses the Q-function to help learn the policy. It is highly recommended for continuous action spaces (in fact it can be used only in continuous action spaces) and is an analogue of Q-learning for these spaces. 
+
+## Hyperparameters 
+
+The hyperparameters we chose in the end are as follows: 
+
+From `ddpg_agent.py`, changes made to the Udacity-provided values are mentioned above:
+
+```
+BUFFER_SIZE = int(1e6)  # replay buffer size
+BATCH_SIZE = 1024        # minibatch size
+GAMMA = 0.99            # discount factor
+TAU = 1e-3              # for soft update of target parameters
+LR_ACTOR = 1e-3         # learning rate of the actor 
+LR_CRITIC = 1e-3        # learning rate of the critic
+WEIGHT_DECAY = 0        # L2 weight decay
+```
+For our neural networks (Actor/Critic) in `model.py` (in fact the same as those provided by Udacity's sample code):
+
+`fc1_units=400, fc2_units=300`
+
+## Model architectures 
+
+The 2 neural networks used are the Actor and the Critic. 
+
+### Actor
+
+3 layers: 
++ Linear fully-connected layer (input = state size (33), output = 400) with ReLu activation. 
++ Batch normalisation on the first layer. 
++ Linear fully-connected layer (input = 400, output = 300) with ReLu activation.
++ Linear fully-connected layer (input = 400, output = action space (4)) with TanH activation. 
+
+### Critic
+
+3 layers: 
++ Linear fully-connected layer (input = state size (33), output = 400) with ReLu activation. 
++ Batch normalisation on the first layer. 
++ Linear fully-connected layer (input = 400, output = 300) with ReLu activation.
++ Linear fully-connected layer (input = 400, output = 1). 
+
+
+------
+
+# Ideas for improving future performance 
+
+Our model trained very slowly. It trained in many more episodes than the Udacity example did (albeit for a different use case) and slower than the Udacity team mentioned their own model trained. In order to improve this, we could adopt the method of training multiple parallel agents (the 20-agent use case) which would allow them to learn from each other and perhaps learn faster. In addition, we could choose our hyperparameters based on a comprehensive search algorithm rather than educated guesses as we have done here.  
+
